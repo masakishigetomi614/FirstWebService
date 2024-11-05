@@ -1,46 +1,88 @@
 // pages/index.js
-import { useEffect, useState } from 'react'
-import { supabase } from '../supabase/supabaseClient'
-import TodoList from '../components/TodoList'
+import { useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
 
 export default function Home() {
-  const [todos, setTodos] = useState([])
-  const [newTask, setNewTask] = useState('')
+  const [todos, setTodos] = useState([]);
+  const [task, setTask] = useState('');
 
-  // SupabaseからTODOリストを取得
   useEffect(() => {
-    fetchTodos()
-  }, [])
+    fetchTodos();
+  }, []);
 
   const fetchTodos = async () => {
-    const { data, error } = await supabase.from('todos').select('*')
-    if (error) console.log('Error fetching todos:', error)
-    else setTodos(data)
-  }
+    const { data } = await supabase.from('todos').select('*');
+    setTodos(data);
+  };
 
-  // 新しいタスクを追加
   const addTodo = async () => {
+    if (!task) return;
+  
+    const { data, error } = await supabase.from('todos').insert([{ task }]);
+  
+    if (error) {
+      console.error("Error inserting todo:", error);
+      return; // エラーが発生した場合、処理を中止
+    }
+  
+    if (data && Array.isArray(data)) {
+      setTodos([...todos, ...data]);
+    } else {
+      console.error("Data is not an array:", data);
+    }
+  
+    setTask('');
+    fetchTodos()
+  };
+  
+
+  const toggleTodo = async (id, is_completed) => {
     const { data, error } = await supabase
       .from('todos')
-      .insert([{ task: newTask, is_complete: false }])
-    if (error) console.log('Error adding todo:', error)
-    else {
-      setTodos([...todos, ...data])
-      setNewTask('')
+      .update({ is_completed: !is_completed })
+      .eq('id', id);
+  
+    if (error) {
+      console.error("Error updating todo:", error);
+      return; // エラーが発生した場合、処理を中止
     }
-  }
+  
+    if (data && Array.isArray(data) && data.length > 0) {
+      setTodos(todos.map(todo => (todo.id === id ? data[0] : todo)));
+    } else {
+      console.error("Data is not valid:", data);
+    }
+    fetchTodos()
+  };
+  
+
+  const deleteTodo = async (id) => {
+    await supabase.from('todos').delete().eq('id', id);
+    setTodos(todos.filter(todo => todo.id !== id));
+    fetchTodos()
+  };
 
   return (
     <div>
-      <h1>Todo List</h1>
-      <TodoList todos={todos} />
+      <h1>TODO App</h1>
       <input
         type="text"
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
+        value={task}
+        onChange={(e) => setTask(e.target.value)}
         placeholder="Add a new task"
       />
-      <button onClick={addTodo}>Add Task</button>
+      <button onClick={addTodo}>Add</button>
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>
+            <span style={{ textDecoration: todo.is_completed ? 'line-through' : 'none' }}>
+              {todo.task}
+            </span>
+            <button onClick={() => toggleTodo(todo.id, todo.is_completed)}>Toggle</button>
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
-  )
+  );
 }
