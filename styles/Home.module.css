@@ -1,0 +1,50 @@
+/* styles/Home.module.css */
+
+/* 画像上に表示されるボタンのスタイル */
+.sliderWrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.sliderImage {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+/* ボタン共通スタイル */
+.button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);  /* 中央に配置 */
+  background-color: rgba(0, 0, 0, 0); /* 透明度のある黒 */
+  color: rgba(0, 0, 0, 0.3); /* ボタン文字色を白に */
+  border: none;
+  width: 50px;  /* ボタンの横幅 */
+  height: 50px; /* ボタンの縦幅 */
+  cursor: pointer;
+  opacity: 0.7;
+  border-radius: 50%; /* 丸いボタン */
+  font-size: 20px; /* フォントサイズを調整 */
+  z-index: 1; /* ボタンが画像の上に表示されるように */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.prevButton {
+  left: 5px; /* 左端に配置 */
+  left: 10%;  /* 位置を微調整 (50%より少し上に) */
+}
+
+.nextButton {
+  right: 5px; /* 右端に配置 */
+  right: 10%;  /* 位置を微調整 (50%より少し上に) */
+}
+
+/* ボタンがホバーされた時のスタイル */
+.button:hover {
+  opacity: 1; /* ホバー時に透明度を100%に */
+  background-color: rgba(0, 0, 0, 0);
+}
